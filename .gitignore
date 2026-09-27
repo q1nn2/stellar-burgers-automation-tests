@@ -12,7 +12,6 @@ venv/
 .pytest_cache/
 
 # Allure
-allure-results/
 allure-report/
 
 # IDE
