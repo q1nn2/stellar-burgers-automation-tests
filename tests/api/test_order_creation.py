@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 import allure
 
-from data.messages import INGREDIENTS_REQUIRED
+from data.messages import INGREDIENTS_REQUIRED, INTERNAL_SERVER_ERROR
 from data.test_data import INVALID_INGREDIENT_HASH
 
 
@@ -66,3 +66,4 @@ class TestOrderCreation:
         )
 
         assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert INTERNAL_SERVER_ERROR in response.text
