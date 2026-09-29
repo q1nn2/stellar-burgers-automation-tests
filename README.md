@@ -1,4 +1,4 @@
-# Stellar Burgers — Automation Tests
+# Stellar Burgers — API Tests
 
 Автоматизированные API-тесты сервиса Stellar Burgers.
 
@@ -8,24 +8,25 @@
 - pytest
 - requests
 - allure-pytest
+- GitHub Actions
 
-## Покрываемые сценарии
+## Проверяемые сценарии
 
 ### Пользователи
 
-- успешная регистрация уникального пользователя;
+- регистрация уникального пользователя;
 - запрет повторной регистрации существующего пользователя;
-- проверка каждого обязательного поля: `email`, `password`, `name`;
-- успешная авторизация зарегистрированного пользователя;
-- ошибка авторизации при неверном email;
-- ошибка авторизации при неверном пароле.
+- проверка обязательных полей `email`, `password`, `name`;
+- авторизация зарегистрированного пользователя;
+- обработка неверного email;
+- обработка неверного пароля.
 
 ### Заказы
 
 - создание заказа авторизованным пользователем;
 - создание заказа без авторизации;
 - создание заказа с валидными ингредиентами;
-- ошибка при создании заказа без ингредиентов;
+- обработка заказа без ингредиентов;
 - обработка неверного хеша ингредиента.
 
 Валидные идентификаторы ингредиентов запрашиваются через API перед выполнением тестов. Тестовые пользователи генерируются динамически и удаляются после завершения сценария.
@@ -48,7 +49,8 @@ stellar-burgers-automation-tests/
 │       └── test_user_login.py
 ├── utils/
 │   └── generators.py
-├── .gitignore
+├── .github/workflows/
+├── allure-results/
 ├── pytest.ini
 ├── requirements.txt
 └── README.md
@@ -59,7 +61,6 @@ stellar-burgers-automation-tests/
 ```bash
 git clone https://github.com/q1nn2/stellar-burgers-automation-tests.git
 cd stellar-burgers-automation-tests
-git checkout develop2
 python -m venv venv
 ```
 
@@ -69,46 +70,24 @@ Windows:
 venv\Scripts\activate
 ```
 
-Установить зависимости:
+Установка зависимостей:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Запуск API-тестов
+## Запуск
 
 ```bash
 pytest tests/api
 ```
 
-Результаты Allure сохраняются в `allure-results` автоматически.
+## Allure
 
-Просмотр отчёта:
+Результаты сохраняются в `allure-results`.
 
 ```bash
 allure serve allure-results
 ```
 
-Создание статического отчёта:
-
-```bash
-allure generate allure-results -o allure-report --clean
-```
-
-## API
-
-Базовый адрес:
-
-```text
-https://stellarburgers.education-services.ru
-```
-
-Используемые эндпоинты:
-
-```text
-POST   /api/auth/register
-POST   /api/auth/login
-DELETE /api/auth/user
-GET    /api/ingredients
-POST   /api/orders
-```
+Базовый адрес и маршруты API находятся в `data/urls.py`.
