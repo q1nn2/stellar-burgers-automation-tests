@@ -1,0 +1,111 @@
+name: Проверка автотестов
+
+on:
+  push:
+    branches:
+      - develop3
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autotests-develop3
+  cancel-in-progress: true
+
+jobs:
+  api-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Настроить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Установить зависимости
+        run: pip install -r requirements.txt
+
+      - name: Запустить API-тесты
+        run: |
+          rm -rf allure-results
+          pytest -vv tests/api
+
+      - name: Сохранить API Allure как артефакт
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-allure-results
+          path: allure-results
+          retention-days: 7
+
+  ui-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Настроить Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Установить зависимости
+        run: pip install -r requirements.txt
+
+      - name: Проверить браузеры
+        run: |
+          google-chrome --version
+          firefox --version
+
+      - name: Запустить UI-тесты
+        run: |
+          rm -rf allure-results
+          timeout 300s xvfb-run -a pytest -vv tests/ui
+
+      - name: Сохранить UI Allure как артефакт
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-allure-results
+          path: allure-results
+          retention-days: 7
+
+  save-allure:
+    needs:
+      - api-tests
+      - ui-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Получить код
+        uses: actions/checkout@v4
+
+      - name: Очистить предыдущие результаты
+        run: rm -rf allure-results
+
+      - name: Получить API Allure
+        uses: actions/download-artifact@v4
+        with:
+          name: api-allure-results
+          path: allure-results
+
+      - name: Получить UI Allure
+        uses: actions/download-artifact@v4
+        with:
+          name: ui-allure-results
+          path: allure-results
+
+      - name: Сохранить результаты Allure в репозиторий
+        run: |
+          git config user.name "q1nn2"
+          git config user.email "90451521+q1nn2@users.noreply.github.com"
+          git add allure-results
+          if git diff --cached --quiet; then
+            echo "Изменений в Allure нет"
+          else
+            git commit -m "Обновлены результаты Allure для API и UI"
+            git push origin HEAD:develop3
+          fi
